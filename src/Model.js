@@ -28,16 +28,28 @@ class Model {
     })
   }
 
-  static all () {
-    // Get all the models from the db and inflate them
-    return nSQL(this.table)
-      .query('select')
+  static async all () {
+    return new Promise((res, rej) => {
+      // Get all the models from the db and inflate them
+      nSQL(this.table)
+        .query('select')
+        .exec()
+        .then((result, db) => {
+          let models = []
+
+          result.forEach(result => {
+            models.push(new this(result))
+          })
+
+          res(models)
+        })
+    })
   }
 
   /**
    * Returns a single model
    */
-  static find (key) {
+  static async find (key) {
     return new Promise((res, rej) => {
       nSQL(this.table)
         .query('select')
@@ -48,68 +60,6 @@ class Model {
           res(model)
         })
     })
-  }
-
-  /**
-   * @return Promise
-   */
-  belongsToMany (TargetClass, PivotClass, localKey, foreignKey) {
-    return {
-      TargetClass,
-      PivotClass,
-      /**
-       * @returns Promise
-       */
-      save: (data, pivotData) => new Promise((resolve, reject) => {
-        console.debug('Model::belongsToMany::save')
-        // Instantiate the data in its own model
-        let targetModel = new TargetClass(data)
-
-        // Save the model
-        targetModel.save().then(() => {
-          console.debug('Model::belongsToMany::save - Saved targetModel:', targetModel)
-          let pivotModel = new PivotClass(pivotData)
-          // Set the targetModel's keyPath in the pivotModel's attributes
-          pivotModel.attributes[pivotModel.keyAttribute[0]] = targetModel.key
-          // Set the current model's keyPath in the pivotModel's attributes
-          pivotModel.attributes[pivotModel.keyAttribute[1]] = this.key
-          console.log('PivotModel', pivotModel, pivotModel.keyAttribute, pivotModel.key)
-
-          // Save the pivot
-          pivotModel.save().then(() => {
-            console.debug('Model::belongsToMany::save - Saved pivotModel:', pivotModel)
-            resolve(targetModel, pivotModel)
-          }).catch(error => {
-            console.error('Model::belongsToMany::save::pivotModel.save()', error)
-            throw new Error('Model::belongsToMany::save::pivotModel.save() - Error while saving pivotModel. ' + error.error)
-          })
-        }).catch(error => {
-          console.error('Model::belongsToMany::save::targetModel.save()', error)
-          throw new Error('Model::belongsToMany::save() - Error while saving targetModel' + error.error)
-        })
-      }),
-      create: (data, pivotData) => new Promise((resolve, reject) => {
-        TargetClass.create(data).then(model => {
-          console.debug('Model::belongsToMany::create. Created target model', model)
-          PivotClass.create(pivotData).then(pivotModel => {
-            console.debug('Model::belongsToMany::create. Created pivot model', pivotModel)
-            resolve(model)
-          }).error(reject)
-        }).catch(error => {
-          console.error('Model::belongsToMany::create', error)
-          reject(error)
-        })
-      }),
-      find: (key) => new Promise((resolve, reject) => {
-        console.debug('Model::belongsToMany::find. Key:', key)
-        throw new Error('Not implemented')
-      }),
-      get: () => new Promise((resolve, reject) => {
-        PivotClass.where(foreignKey, this.attributes[localKey]).then(models => {
-          resolve(models)
-        }).catch(resolve)
-      })
-    }
   }
 
   static get keyAttribute () {
