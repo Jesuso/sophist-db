@@ -1,0 +1,49 @@
+{
+  "name": "sophist-db",
+  "version": "0.1.0",
+  "description": "A client side database using indexedDB with mirroring capabilities using a RESTful API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "prod": "babel src -d lib --minified",
+    "lint": "esw src/ -w",
+    "watch": "babel src -d lib -w"
+  },
+  "keywords": [
+    "orm",
+    "indexdb",
+    "database",
+    "model"
+  ],
+  "author": "Jesuso <jesus.1410@gmail.com> (http://agenciaparadoja.com)",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^8.0.1",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "eslint": "^4.8.0",
+    "eslint-watch": "^3.1.2",
+    "mocha": "^3.5.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "nano-sql": "^0.9.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jesuso/sophist-db.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Jesuso/sophist-db/issues"
+  },
+  "homepage": "https://github.com/Jesuso/sophist-db#readme",
+  "babel": {
+    "presets": [
+      "env"
+    ],
+    "comments": false
+  }
+}
