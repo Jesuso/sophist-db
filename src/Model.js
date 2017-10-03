@@ -21,7 +21,7 @@ class Model {
         .query('upsert', attributes)
         .exec()
         .then((result, db) => {
-          let model = new this(result[1][0])
+          let model = new this(result[0].rows[0])
           // Grab the last inserted record and inflate it
           res(model)
         })
