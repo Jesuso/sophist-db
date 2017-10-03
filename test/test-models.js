@@ -6,6 +6,7 @@ class Person extends Sophist.Model {
     return [ // Table/Store
       { key: 'id', type: 'int', props:['pk'] },
       { key: 'name', type: 'string' },
+      { key: 'age', type: 'int' },
       { key: 'pets', type: 'Pet[]' }
     ]
   }

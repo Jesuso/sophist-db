@@ -16,9 +16,9 @@ describe('Database', () => {
 
 describe('Model', () => {
   let alice_id = null
+  let alice = null
   
   describe('inserts correctly' , () => {
-    let alice = null
 
     it('without errors', done => {
       Person.create({ name: "Alice" }).then(model => {
@@ -28,22 +28,38 @@ describe('Model', () => {
       })
     })
 
-    it ('and has the correct class', () => {
+    it('and has the correct class', () => {
       assert.equal(Person.name, alice.constructor.name)
     })
 
-    it ('and has the correct id', () => {
+    it('and has the correct id', () => {
       assert.equal(alice_id, alice.getAttribute('id'))
     })
 
-    it ('and has the correct name', () => {
+    it('and has the correct name', () => {
       assert.equal('Alice', alice.getAttribute('name'))
     })
   })
 
-  describe('can be found', () => {
-    let alice = null
+  describe('can be saved from instance', () => {
+    let bob = new Person({ name: 'Bob' })
 
+    it('without errors', (done) => {
+      bob.save().then((model) => {
+        done()
+      })
+    })
+
+    it('and has the correct class', () => {
+      assert.equal(Person.name, bob.constructor.name)
+    })
+
+    it('and has the correct name', () => {
+      assert.equal('Bob', bob.getAttribute('name'))
+    })
+  })
+
+  describe('can be found', () => {
     it('without errors', done => {
       Person
         .find(alice_id)
@@ -53,16 +69,30 @@ describe('Model', () => {
         })
     })
 
-    it ('and has the correct class', () => {
+    it('and has the correct class', () => {
       assert.equal(Person.name, alice.constructor.name)
     })
 
-    it ('and has the correct id', () => {
+    it('and has the correct id', () => {
       assert.equal(alice_id, alice.getAttribute('id'))
     })
 
-    it ('and has the correct name', () => {
+    it('and has the correct name', () => {
       assert.equal('Alice', alice.getAttribute('name'))
+    })
+  })
+
+  describe('can be updated', () => {
+    it('without errors', (done) => {
+      alice.setAttribute('age', '18')
+
+      alice.save().then((model) => {
+        done()
+      })
+    })
+
+    it('and has the correct age', () => {
+      assert.equal(18, alice.getAttribute('age'))
     })
   })
 
@@ -79,17 +109,16 @@ describe('Model', () => {
     })
 
     describe('and the result', () => {
-      it ('is an array', () => {
+      it('is an array', () => {
         assert.ok(Array.isArray(models))
       })
 
-      it ('isn\'t empty', () => {
+      it('isn\'t empty', () => {
         assert.ok(models.length > 0)
       })
 
-      it ('contains Persons', () => {
+      it('contains Persons', () => {
         let model = models[0]
-        console.log('Model: ', model)
         assert.equal(Person.name, model.constructor.name)
       })
     })
