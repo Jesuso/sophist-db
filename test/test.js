@@ -42,6 +42,7 @@ describe('Model', () => {
   })
 
   describe('inserts with relations', () => {
+    let sarah = null
     let sarah_id = null
     let pet_id = null
 
@@ -54,6 +55,7 @@ describe('Model', () => {
           { name: 'Max' }
         ]
       }).then(model => {
+        sarah = model
         sarah_id = model.id
         pet_id = model.pets[1]
         done()
@@ -70,6 +72,16 @@ describe('Model', () => {
       })
     })
 
+    it ('and relations exist afterwar re-consulting', done => {
+      Person.find(sarah_id).then(model => {
+        if (model.pets.length == 2) {
+          return done()
+        }
+
+        done(new Error('No pets found in database after insertion'))
+      })
+    })
+
     it ('and the relation goes both ways', done => {
       Pet.find(pet_id).then(model => {
         if (model.name == 'Max') {
@@ -77,6 +89,12 @@ describe('Model', () => {
         }
 
         done(new Error('The relation found doesn\'t seem to be what expected'))
+      })
+    })
+
+    it ('and re-saving works', done => {
+      sarah.save().then(model => {
+        console.log('Sarah: ', model)
       })
     })
   })
