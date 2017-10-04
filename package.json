@@ -1,6 +1,6 @@
 {
   "name": "sophist-db",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A client side database using indexedDB with mirroring capabilities using a RESTful API.",
   "main": "index.js",
   "scripts": {

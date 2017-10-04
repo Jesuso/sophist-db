@@ -5,12 +5,19 @@ class Model {
 
   constructor (attributes) {
     Object.defineProperty(this, '_attributes', { value: attributes, writable: true })
-    Object.defineProperty(this, '_table', { writable: false })
-    Object.defineProperty(this, '_keyAttribute', { value: 'id', writable: true })
   }
 
   // Create the model we want to save
   static async create (attributes) {
+    // If the db isn't ready, delay the execution
+    if (!this.db) {
+      return new Promise((res, rej) => {
+        setTimeout(() => {
+          this.create(attributes).then(res).catch(rej)
+        }, 100)
+      })
+    }
+
     return new Promise((res, rej) => {
       nSQL(this.table)
         .query('upsert', attributes)
@@ -24,6 +31,15 @@ class Model {
   }
 
   async save () {
+    // If the db isn't ready, delay the execution
+    if (!this.constructor.db) {
+      return new Promise((res, rej) => {
+        setTimeout(() => {
+          this.save().then(res)
+        }, 100)
+      })
+    }
+
     return new Promise((res, rej) => {
       nSQL(this.table)
         .query('upsert', this.attributes)
@@ -39,6 +55,16 @@ class Model {
   }
 
   static async all () {
+    // If the db isn't ready, delay the execution
+    if (!this.db) {
+      return new Promise((res, rej) => {
+        setTimeout(() => {
+          this.all().then(res)
+        }, 100)
+      })
+    }
+    
+    // console.log('DB: ', this.db)
     return new Promise((res, rej) => {
       // Get all the models from the db and inflate them
       nSQL(this.table)
@@ -60,6 +86,15 @@ class Model {
    * Returns a single model
    */
   static async find (key) {
+    // If the db isn't ready, delay the execution
+    if (!this.db) {
+      return new Promise((res, rej) => {
+        setTimeout(() => {
+          this.find(key).then(res).catch(rej)
+        }, 100)
+      })
+    }
+
     return new Promise((res, rej) => {
       nSQL(this.table)
         .query('select')
@@ -84,19 +119,19 @@ class Model {
   }
 
   static get keyAttribute () {
-    return (new this).keyAttribute
+    return 'id'
   }
 
   get keyAttribute () {
-    return this._keyAttribute ? this._keyAttribute : 'id'
+    return this.constructor.keyAttribute
   }
 
   static get table() {
-    return (new this).table
+    return this.name.toLowerCase()
   }
 
   get table () {
-    return this._table ? this._table : this.constructor.name.toLowerCase()
+    return this.constructor.table
   }
 
   get attributes () {

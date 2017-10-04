@@ -8,8 +8,17 @@ let Pet = TM.Pet
 
 describe('Database', () => {
   it('initializes correctly', done => {
-    Sophist.Database.Setup([Person, Pet]).then((result, db) => {
+    Sophist.Database.Setup([Person, Pet]).then(() => {
       done()
+    })
+  })
+
+  it('can be used while connecting', (done) => {
+    Person.all().then(models => {
+      if (models.length > 0) 
+        return done()
+
+      done(new Error('Not connected yet'))
     })
   })
 })
@@ -84,7 +93,7 @@ describe('Model', () => {
 
   describe('can be updated', () => {
     it('without errors', (done) => {
-      alice.setAttribute('age', '18')
+      alice.setAttribute('age', 18)
 
       alice.save().then((model) => {
         done()
