@@ -64,7 +64,6 @@ class Model {
       })
     }
     
-    // console.log('DB: ', this.db)
     return new Promise((res, rej) => {
       // Get all the models from the db and inflate them
       nSQL(this.table)

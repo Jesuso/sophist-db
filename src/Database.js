@@ -11,6 +11,15 @@ class Database {
     models.forEach(modelClass => {
       nSQL(modelClass.table)
         .model(modelClass.schema)
+
+      // Define model attributes as getters
+      modelClass.schema.forEach(attr => {
+        Object.defineProperty(modelClass.prototype, attr.key, {
+          get: function () {
+            return this.getAttribute(attr.key)
+          }
+        })
+      })
     })
 
     return new Promise ((res, rej) => {

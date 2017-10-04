@@ -30,9 +30,9 @@ describe('Model', () => {
   describe('inserts correctly' , () => {
 
     it('without errors', done => {
-      Person.create({ name: "Alice" }).then(model => {
+      Person.create({ name: "Alice", age: 21 }).then(model => {
         alice = model
-        alice_id = alice.getAttribute('id')
+        alice_id = alice.id
         done()
       })
     })
