@@ -64,9 +64,8 @@ describe('Model', () => {
 
     it ('and relations exist afterwards', done => {
       Person.find(sarah_id).then(model => {
-        if (model.pets.length == 2) {
+        if (model.pets.length == 2)
           return done()
-        }
 
         done(new Error('No pets found in database after insertion'))
       })
@@ -74,9 +73,8 @@ describe('Model', () => {
 
     it ('and relations exist afterwar re-consulting', done => {
       Person.find(sarah_id).then(model => {
-        if (model.pets.length == 2) {
+        if (model.pets.length == 2)
           return done()
-        }
 
         done(new Error('No pets found in database after insertion'))
       })
@@ -84,9 +82,8 @@ describe('Model', () => {
 
     it ('and the relation goes both ways', done => {
       Pet.find(pet_id).then(model => {
-        if (model.name == 'Max') {
+        if (model.name == 'Max')
           return done()
-        }
 
         done(new Error('The relation found doesn\'t seem to be what expected'))
       })
@@ -94,7 +91,10 @@ describe('Model', () => {
 
     it ('and re-saving works', done => {
       sarah.save().then(model => {
-        console.log('Sarah: ', model)
+        if(model.attributes == sarah.attributes)
+          return done()
+
+        done(new Error('Expected attributes don\'t match'))
       })
     })
   })
