@@ -7,8 +7,12 @@ class Person extends Sophist.Model {
       { key: 'id', type: 'int', props:['pk'] },
       { key: 'name', type: 'string' },
       { key: 'age', type: 'int' },
-      { key: 'pets', type: 'Pet[]' }
+      { key: 'pets', type: 'pet[]', props:["ref=>owner"], model: Pet }
     ]
+  }
+
+  pets () {
+    return this.hasMany('Pet')
   }
 }
 
@@ -17,7 +21,7 @@ class Pet extends Sophist.Model {
     return [ // Table/Store
       { key: 'id', type: 'int', props:['pk'] },
       { key: 'name', type: 'string' },
-      { key: 'owner', type: 'Person' }
+      { key: 'owner', type: 'person', props:["ref=>pets"], model: Person }
     ]
   }
 }

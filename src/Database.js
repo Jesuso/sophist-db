@@ -1,7 +1,7 @@
 var nSQL = require("nano-sql").nSQL
 
 class Database {
-  static async Setup(models) {
+  static async Setup (models) {
     if (this.db) {
       throw new Error('The database was already initialized')
     }

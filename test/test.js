@@ -1,4 +1,4 @@
-let assert = require('assert');
+let assert = require('assert')
 let Sophist = require('../lib/')
 let TM = require('./test-models')
 
@@ -12,15 +12,6 @@ describe('Database', () => {
       done()
     })
   })
-
-  it('can be used while connecting', (done) => {
-    Person.all().then(models => {
-      if (models.length > 0) 
-        return done()
-
-      done(new Error('Not connected yet'))
-    })
-  })
 })
 
 describe('Model', () => {
@@ -30,7 +21,7 @@ describe('Model', () => {
   describe('inserts correctly' , () => {
 
     it('without errors', done => {
-      Person.create({ name: "Alice", age: 21 }).then(model => {
+      Person.create({ name: 'Alice', age: 21 }).then(model => {
         alice = model
         alice_id = alice.id
         done()
@@ -47,6 +38,46 @@ describe('Model', () => {
 
     it('and has the correct name', () => {
       assert.equal('Alice', alice.getAttribute('name'))
+    })
+  })
+
+  describe('inserts with relations', () => {
+    let sarah_id = null
+    let pet_id = null
+
+    it ('without errors', done => {
+      Person.create({
+        name: 'Sarah',
+        age: 21,
+        pets: [
+          { name: 'Fiddo' },
+          { name: 'Max' }
+        ]
+      }).then(model => {
+        sarah_id = model.id
+        pet_id = model.pets[1]
+        done()
+      })
+    })
+
+    it ('and relations exist afterwards', done => {
+      Person.find(sarah_id).then(model => {
+        if (model.pets.length == 2) {
+          return done()
+        }
+
+        done(new Error('No pets found in database after insertion'))
+      })
+    })
+
+    it ('and the relation goes both ways', done => {
+      Pet.find(pet_id).then(model => {
+        if (model.name == 'Max') {
+          return done()
+        }
+
+        done(new Error('The relation found doesn\'t seem to be what expected'))
+      })
     })
   })
 
@@ -132,4 +163,4 @@ describe('Model', () => {
       })
     })
   })
-});
+})
