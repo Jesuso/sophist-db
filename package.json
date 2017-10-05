@@ -23,14 +23,14 @@
     "babel-preset-env": "^1.6.0",
     "eslint": "^4.8.0",
     "eslint-watch": "^3.1.2",
-    "mocha": "^3.5.3"
+    "mocha": "^3.5.3",
+    "nano-sql": "git+https://github.com/Jesuso/Nano-SQL.git"
   },
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "babel-polyfill": "^6.26.0",
-    "nano-sql": "^0.9.1"
+    "babel-polyfill": "^6.26.0"
   },
   "repository": {
     "type": "git",
