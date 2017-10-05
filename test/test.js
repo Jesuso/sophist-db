@@ -45,8 +45,9 @@ describe('Model', () => {
     let sarah = null
     let sarah_id = null
     let pet_id = null
+    let pet = null
 
-    it ('without errors', done => {
+    it ('without errors (hasMany)', done => {
       Person.create({
         name: 'Sarah',
         age: 21,
@@ -58,6 +59,18 @@ describe('Model', () => {
         sarah = model
         sarah_id = model.id
         pet_id = model.pets[1]
+        done()
+      })
+    })
+
+    it ('without errors (belongsTo)', done => {
+      Pet.create({
+        name: 'Bella',
+        owner: {
+          name: 'Sarah',
+          age: 21,
+        }
+      }).then(model => {
         done()
       })
     })
@@ -82,8 +95,9 @@ describe('Model', () => {
 
     it ('and the relation goes both ways', done => {
       Pet.find(pet_id).then(model => {
-        if (model.name == 'Max')
+        if (model.owner == sarah_id) {
           return done()
+        }
 
         done(new Error('The relation found doesn\'t seem to be what expected'))
       })

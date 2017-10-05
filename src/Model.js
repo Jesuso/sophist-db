@@ -65,7 +65,14 @@ class Model {
 
       let ids = []
 
-      for (let attributes of this.temporaryRawRelations[relation.key]) {
+      // Handle Arrays (hasMany)
+      if (Array.isArray(this.temporaryRawRelations[relation.key])) {
+        for (let attributes of this.temporaryRawRelations[relation.key]) {
+          let model = await (new relation.model(attributes)).save()
+          ids.push(model.key)
+        }
+      } else {
+        let attributes = this.temporaryRawRelations[relation.key]
         let model = await (new relation.model(attributes)).save()
         ids.push(model.key)
       }
@@ -74,13 +81,13 @@ class Model {
 
       // Update database
       await nSQL(this.table)
-        .updateORM('add', relation.key, ids)
+        .updateORM('set', relation.key, ids)
         .where([this.keyAttribute, "=", this.key])
         .exec()
     }
 
     // Clear temporaryRawRelations
-    this.temporaryRawRelations = []
+    delete this.temporaryRawRelations
     return true
   }
 
