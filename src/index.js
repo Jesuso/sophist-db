@@ -1,6 +1,5 @@
-require('babel-polyfill')
-
-const Database = require('./Database.js');
-const Model = require('./Model.js');
+import 'babel-polyfill'
+import Database from './Database.js';
+import Model from './Model.js';
 
 module.exports = { Database, Model }

@@ -4,7 +4,7 @@
   "description": "A client side database using indexedDB with mirroring capabilities using a RESTful API.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha",
+    "test": "mocha --compilers js:babel-core/register test/index.js",
     "prod": "babel src -d lib --minified",
     "lint": "esw src/ -w",
     "watch": "babel src -d lib -w"
@@ -21,6 +21,7 @@
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.0.1",
     "babel-preset-env": "^1.6.0",
+    "chai": "^4.1.2",
     "eslint": "^4.8.0",
     "eslint-watch": "^3.1.2",
     "mocha": "^3.5.3",
