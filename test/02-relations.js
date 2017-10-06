@@ -15,9 +15,9 @@ describe('Relations', () => {
       ]
     }).then(model => {
       try {
+        sarah = model
         expect(model.pets).to.be.an('array')
         expect(model.pets).to.have.lengthOf(2)
-        sarah = model
         done()
       } catch (e) {
         done(e)
@@ -61,6 +61,21 @@ describe('Relations', () => {
     sarah.save().then(model => {
       try {
         expect(model.attributes).to.deep.equal(sarah.attributes)
+        done()
+      } catch (e) {
+        done(e)
+      }
+    })
+  })
+
+  it ('can be consulted from parent model', done => {
+    sarah.getPets().then(pets => {
+      try {
+        expect(pets).to.be.an('array')
+        expect(pets[0]).to.be.an('object')
+        expect(pets[0].attributes).to.contain({
+          name: 'Fiddo'
+        })
         done()
       } catch (e) {
         done(e)

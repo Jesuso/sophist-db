@@ -36,7 +36,7 @@ class Model {
     // Update the attributes with the ones provided by the database
     this.attributes = result[0].rows[0]
 
-    await this.saveTemporaryRelations()
+    await this.saveTemporaryRawRelations()
 
     // return the updated model
     return this
@@ -50,14 +50,25 @@ class Model {
     this.temporaryRawRelations = {}
 
     for (let relation of this.relations) {
-      this.temporaryRawRelations[relation.key] = this.attributes[relation.key]
+      // Check a possible raw hasOne object
+      if (typeof this.attributes[relation.key] == 'object' && !Array.isArray(this.attributes[relation.key])) {
+        this.temporaryRawRelations[relation.key] = [this.attributes[relation.key]]
+      }
+
+      // If it's an array
+      if (Array.isArray(this.attributes[relation.key])) {
+        // Check the contents (first element) are objects
+        if (typeof this.attributes[relation.key][0] == 'object') {
+          this.temporaryRawRelations[relation.key] = this.attributes[relation.key]
+        }
+      }
     }
   }
 
   /**
    *
    */
-  async saveTemporaryRelations () {
+  async saveTemporaryRawRelations () {
     for (let relation of this.relations) {
       if (!this.temporaryRawRelations[relation.key]) {
         continue;
@@ -142,10 +153,7 @@ class Model {
     })
   }
 
-  /**
-   *
-   */
-  get relations () {
+  static get relations () {
     let relations = []
 
     this.schema.forEach(column => {
@@ -155,6 +163,13 @@ class Model {
     })
 
     return relations
+  }
+
+  /**
+   *
+   */
+  get relations () {
+    return this.constructor.relations
   }
 
   /**

@@ -5,17 +5,17 @@ import { Person, Pet } from './test-models'
 describe('Model', () => {
   let alice = null
   
-  it('inserts correctly', done => {
+  it('inserts correctly (Person)', done => {
     Person.create({ name: 'Alice', age: 21 }).then(model => {
       try {
+        alice = model
+
         expect(model.constructor.name).to.equal(Person.name)
         expect(model.id).to.be.a('number')
         expect(model.attributes).to.contain({
           name: 'Alice',
           age: 21,
         })
-
-        alice = model
         done()
       } catch (e) {
         done(e)
