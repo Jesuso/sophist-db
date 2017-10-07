@@ -22,13 +22,15 @@ class Database {
       }
 
       for (let rel of modelClass.relations) {
-        let methodName = rel.key
+        // converts to getPascalCase. ex: pets to getPets
+        let asyncMethodName = rel.key
           .replace('_', ' ')
           .replace(/(\w)(\w*)/g, (g0, g1, g2) => g1.toUpperCase() + g2.toLowerCase())
           .replace(' ', '')
           .replace (/^/,'get')
-        
-        modelClass.prototype[methodName] = async function () {
+
+        // model.getPets().then(...)
+        modelClass.prototype[asyncMethodName] = async function () {
           // Relationship rows hold primary keys.
           return new Promise((res, rej) => {
             nSQL(modelClass.table)
@@ -45,6 +47,26 @@ class Database {
             })
           })
         }
+        
+        // model.$pets returns related Model(s)
+        Object.defineProperty(modelClass.prototype, '_'+rel.key, {
+          value: [],
+          writable: true,
+        })
+
+        Object.defineProperty(modelClass.prototype, '$'+rel.key, {
+          get: function () {
+            if (this['_' + rel.key].length == this[rel.key].length) {
+              return this['_' + rel.key]
+            }
+
+            this[asyncMethodName]().then(models => {
+              this['_' + rel.key] = models
+            })
+
+            return this['_' + rel.key]
+          }
+        })
       }
     })
 
