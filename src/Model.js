@@ -251,17 +251,14 @@ class Model {
     let updated = false
 
     this.schema.forEach(col => {
-      if (attr == col.key | attr == '_' + col.key) {
+      if (attr == col.key) {
         copy[attr] = val
         this[attr] = val
-
-        updated = true
+      } else if (attr == '_' + col.key) {
+        copy['_' + attr] = val
+        this['_' + attr] = val
       }
     })
-
-    if (!updated) {
-      throw new Error('Attribute ' + attr + ' doesn\'t exist in this model ('+ this.constructor.name +')')
-    }
 
     return this._attributes = copy
   }
