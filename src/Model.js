@@ -4,7 +4,8 @@ class Model {
   // Column Types: string, safestr, timeId, timeIdms, uuid, int, float, array, map, bool, blob, any
 
   constructor (attributes) {
-    Object.defineProperty(this, '_attributes', { value: attributes, writable: true })
+    Object.defineProperty(this, '_attributes', { writable: true, enumerable: false })
+    this.setAttributes(attributes)
   }
 
   /**
@@ -208,7 +209,7 @@ class Model {
   }
 
   set attributes (attributes) {
-    this._attributes = attributes
+    this.setAttributes(attributes)
   }
 
   /**
@@ -250,8 +251,10 @@ class Model {
     let updated = false
 
     this.schema.forEach(col => {
-      if (col.key == attr) {
+      if (attr == col.key | attr == '_' + col.key) {
         copy[attr] = val
+        this[attr] = val
+
         updated = true
       }
     })
@@ -260,7 +263,18 @@ class Model {
       throw new Error('Attribute ' + attr + ' doesn\'t exist in this model ('+ this.constructor.name +')')
     }
 
-    return this.attributes = copy
+    return this._attributes = copy
+  }
+
+  /**
+   *
+   */
+  setAttributes (attributes) {
+    for (let attr in attributes) {
+      this.setAttribute(attr, attributes[attr])
+    }
+
+    return this.attributes
   }
 }
 

@@ -72,10 +72,10 @@ describe('Relations', () => {
     sarah.getPets().then(pets => {
       try {
         expect(pets).to.be.an('array')
+        expect(pets).to.have.lengthOf(2)
         expect(pets[0]).to.be.an('object')
-        expect(pets[0].attributes).to.contain({
-          name: 'Fiddo'
-        })
+        expect(pets[0].constructor.name).to.equal(Pet.name)
+        expect(pets[0].name).to.equal('Fiddo')
         done()
       } catch (e) {
         done(e)
@@ -83,19 +83,14 @@ describe('Relations', () => {
     })
   })
 
-  it ('relations can be consulted via $relation', done => {
+  it ('relations can be consulted synchronously after retrieval', done => {
     try {
-      expect(sarah.$pets).to.be.an('array')
-
-      // Check 1ms later
-      setTimeout(() => {
-        expect(sarah.$pets).to.be.an('array')
-        expect(sarah.$pets).to.have.lengthOf(2)
-        expect(sarah.$pets[0]).to.be.an('object')
-        expect(sarah.$pets[0].constructor.name).to.equal(Pet.name)
-        expect(sarah.$pets[0].name).to.equal('Fiddo')
-        done()
-      }, 0)
+      expect(sarah._pets).to.be.an('array')
+      expect(sarah._pets).to.have.lengthOf(2)
+      expect(sarah._pets[0]).to.be.an('object')
+      expect(sarah._pets[0].constructor.name).to.equal(Pet.name)
+      expect(sarah._pets[0].name).to.equal('Fiddo')
+      done()
     } catch (e) {
       done(e)
     }

@@ -13,13 +13,13 @@ class Database {
         .model(modelClass.schema)
 
       // Define model attributes/relations as getters
-      for (let attr of modelClass.schema) {
-        Object.defineProperty(modelClass.prototype, attr.key, {
-          get: function () {
-            return this.getAttribute(attr.key)
-          }
-        })
-      }
+      // for (let attr of modelClass.schema) {
+      //   Object.defineProperty(modelClass.prototype, attr.key, {
+      //     get: function () {
+      //       return this.getAttribute(attr.key)
+      //     }
+      //   })
+      // }
 
       for (let rel of modelClass.relations) {
         // converts to getPascalCase. ex: pets to getPets
@@ -42,31 +42,13 @@ class Database {
                   let model = new rel.model(attributes)
                   models.push(model)
                 }
+
+                this.setAttribute('_' + rel.key, models)
                 
                 res(models)
             })
           })
         }
-        
-        // model.$pets returns related Model(s)
-        Object.defineProperty(modelClass.prototype, '_'+rel.key, {
-          value: [],
-          writable: true,
-        })
-
-        Object.defineProperty(modelClass.prototype, '$'+rel.key, {
-          get: function () {
-            if (this['_' + rel.key].length == this[rel.key].length) {
-              return this['_' + rel.key]
-            }
-
-            this[asyncMethodName]().then(models => {
-              this['_' + rel.key] = models
-            })
-
-            return this['_' + rel.key]
-          }
-        })
       }
     })
 
