@@ -251,12 +251,9 @@ class Model {
     let updated = false
 
     this.schema.forEach(col => {
-      if (attr == col.key) {
+      if (attr == col.key | attr == '_' + col.key) {
         copy[attr] = val
         this[attr] = val
-      } else if (attr == '_' + col.key) {
-        copy['_' + attr] = val
-        this['_' + attr] = val
       }
     })
 
