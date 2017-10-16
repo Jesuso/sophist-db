@@ -12,16 +12,11 @@ class Database {
       nSQL(modelClass.table)
         .model(modelClass.schema)
 
-      // Define model attributes/relations as getters
-      // for (let attr of modelClass.schema) {
-      //   Object.defineProperty(modelClass.prototype, attr.key, {
-      //     get: function () {
-      //       return this.getAttribute(attr.key)
-      //     }
-      //   })
-      // }
-
       for (let rel of modelClass.relations) {
+        if (!rel.key.startsWith('_')) {
+          throw new Error('Relations must start with an underscore "_"')
+        }
+
         // converts to getPascalCase. ex: pets to getPets
         let asyncMethodName = rel.key
           .replace('_', ' ')
@@ -43,7 +38,8 @@ class Database {
                   models.push(model)
                 }
 
-                this.setAttribute('_' + rel.key, models)
+                console.log('Setting ', rel.key, 'to: ', models)
+                this.setAttribute(rel.key, models)
                 
                 res(models)
             })

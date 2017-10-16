@@ -1,6 +1,6 @@
 {
   "name": "sophist-db",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A client side database using indexedDB with mirroring capabilities using a RESTful API.",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "eslint": "^4.8.0",
     "eslint-watch": "^3.1.2",
     "mocha": "^3.5.3",
-    "nano-sql": "git+https://github.com/Jesuso/Nano-SQL.git"
+    "nano-sql": "^0.9.3"
   },
   "directories": {
     "test": "test"

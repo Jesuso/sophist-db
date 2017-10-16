@@ -4,8 +4,18 @@ import { Person } from './test-models'
 
 describe('Model', () => {
   let alice = null
+
+  it ('instantiates correctly', () => {
+    let alice = new Person({ name: 'Alice', age: 21 })
+
+    expect(alice.constructor.name).to.equal(Person.name)
+    expect(alice.attributes).to.contain({
+      name: 'Alice',
+      age: 21,
+    })
+  })
   
-  it('inserts correctly (Person)', done => {
+  it('inserts correctly', done => {
     Person.create({ name: 'Alice', age: 21 }).then(model => {
       try {
         alice = model

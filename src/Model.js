@@ -28,8 +28,6 @@ class Model {
       })
     }
 
-    this.saveRawRelationsTemporarily()
-
     let result = await nSQL(this.table)
       .query('upsert', this.attributes)
       .exec()
@@ -37,69 +35,52 @@ class Model {
     // Update the attributes with the ones provided by the database
     this.attributes = result[0].rows[0]
 
-    await this.saveTemporaryRawRelations()
+    await this.saveRelations()
 
     // return the updated model
     return this
   }
 
   /**
-   * Saves any relation objects in this.attributes on a temporary property
-   * to process later (Ex. if 'this' doesn't have an id yet)
-   */
-  saveRawRelationsTemporarily () {
-    this.temporaryRawRelations = {}
-
-    for (let relation of this.relations) {
-      // Check a possible raw hasOne object
-      if (typeof this.attributes[relation.key] == 'object' && !Array.isArray(this.attributes[relation.key])) {
-        this.temporaryRawRelations[relation.key] = [this.attributes[relation.key]]
-      }
-
-      // If it's an array
-      if (Array.isArray(this.attributes[relation.key])) {
-        // Check the contents (first element) are objects
-        if (typeof this.attributes[relation.key][0] == 'object') {
-          this.temporaryRawRelations[relation.key] = this.attributes[relation.key]
-        }
-      }
-    }
-  }
-
-  /**
    *
    */
-  async saveTemporaryRawRelations () {
+  async saveRelations () {
     for (let relation of this.relations) {
-      if (!this.temporaryRawRelations[relation.key]) {
+      // Remove the underscore "_" to the relation
+      let relName = relation.key.replace('_', '')
+      let objects = this[relName]
+
+      // There's nothing to save, just continue
+      if (!objects) {
         continue;
       }
 
       let ids = []
+      let models = []
 
       // Handle Arrays (hasMany)
-      if (Array.isArray(this.temporaryRawRelations[relation.key])) {
-        for (let attributes of this.temporaryRawRelations[relation.key]) {
+      if (Array.isArray(objects)) {
+        for (let attributes of objects) {
           let model = await (new relation.model(attributes)).save()
+          models.push(model)
           ids.push(model.key)
         }
       } else {
-        let attributes = this.temporaryRawRelations[relation.key]
-        let model = await (new relation.model(attributes)).save()
-        ids.push(model.key)
+        models = await (new relation.model(objects)).save()
+        ids.push(models.key)
       }
 
-      this.setAttribute([relation.key], ids)
+      this.setAttribute(relation.key, ids)
+      this.setAttribute(relName, models)
 
       // Update database
       await nSQL(this.table)
+        // .query('upsert', this.attributes, true)
         .updateORM('set', relation.key, ids)
         .where([this.keyAttribute, "=", this.key])
         .exec()
     }
 
-    // Clear temporaryRawRelations
-    delete this.temporaryRawRelations
     return true
   }
 
@@ -132,7 +113,8 @@ class Model {
   /**
    * Returns a single model
    */
-  static async find (key) {
+  static async find (key, orm = []) {
+    orm = orm.map(e => '_'+e)
     // If the db isn't ready, delay the execution
     if (!this.db) {
       return new Promise((res, rej) => {
@@ -145,25 +127,35 @@ class Model {
     return new Promise((res, rej) => {
       nSQL(this.table)
         .query('select')
+        .orm(orm)
         .where([this.keyAttribute, '=', key])
         .exec()
         .then((result, db) => {
-          let model = new this(result[0])
+          let attributes = result[0]
+
+          // Convert the orm back to ids
+          for (let r of orm) {
+            let rel = this.isRelation(r.substr(1))
+            attributes[r.substr(1)] = attributes[r]
+
+            let ids = []
+            for (let obj of attributes[r]) {
+              ids.push(obj[rel.model.keyAttribute])
+            }
+            attributes[r] = ids
+          }
+
+          let model = new this(attributes)
           res(model)
         })
     })
   }
 
+  /**
+   *
+   */
   static get relations () {
-    let relations = []
-
-    this.schema.forEach(column => {
-      if (!this.columnTypes.includes(column.type)) {
-        relations.push(column)
-      }
-    })
-
-    return relations
+    return this.schema.filter(c => c.model)
   }
 
   /**
@@ -171,6 +163,31 @@ class Model {
    */
   get relations () {
     return this.constructor.relations
+  }
+
+  /**
+   *
+   */
+  static isAttribute (attr) {
+    return this.schema.find(c => c.key == attr)
+  }
+
+  /**
+   *
+   */
+  isAttribute (attr) {
+    return this.constructor.isAttribute(attr)
+  }
+
+  /**
+   *
+   */
+  static isRelation (attr) {
+    return this.relations.find(c => c.model && c.key == '_' + attr)
+  }
+
+  isRelation (attr) {
+    return this.constructor.isRelation(attr)
   }
 
   /**
@@ -248,14 +265,36 @@ class Model {
    */
   setAttribute (attr, val) {
     let copy = Object.assign({}, this.attributes)
-    let updated = false
 
-    this.schema.forEach(col => {
-      if (attr == col.key | attr == '_' + col.key) {
-        copy[attr] = val
-        this[attr] = val
+    if (this.isAttribute(attr)) {
+      copy[attr] = val
+      this[attr] = val
+    }
+
+    let rel = this.isRelation(attr)
+    if (rel) {
+      let inflated = []
+
+      if (Array.isArray(val)) {
+        for (let a of val) {
+          if (a.constructor.name == rel.model.name) {
+            inflated.push(a)
+            continue
+          }
+          
+          inflated.push(new rel.model(a))
+        }
+      } else {
+        if (val.constructor.name != rel.model.name) {
+          inflated = val
+        } else {
+          inflated = new rel.model(val)
+        }
       }
-    })
+      
+      copy[attr] = inflated
+      this[attr] = inflated
+    }
 
     return this._attributes = copy
   }
